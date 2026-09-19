@@ -384,6 +384,33 @@ body.dark input[type="date"] { color-scheme: dark; }
 @media (max-width:860px) { .cloud-settings-card { grid-column:span 1; } }
 @media (max-width:580px) { .cloud-status { width:38px; padding:0; justify-content:center; } .cloud-status .cloud-label { display:none; } .cloud-card-body { align-items:stretch; flex-direction:column; } .cloud-card-actions { flex-direction:column; } }
 
+.batch-import-card { border-color:#d8e7dc; }
+.import-modal { width:min(820px,100%); }
+.import-body { padding:20px 24px; }
+.import-controls { display:grid; grid-template-columns:1.4fr .8fr; gap:12px; align-items:stretch; }
+.import-file-picker { min-height:78px; border:1.5px dashed #9fc5ad; background:var(--green-soft); color:var(--green); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; }
+.import-file-picker:hover { border-color:var(--green); }
+.import-file-picker svg { width:25px; height:25px; flex:0 0 auto; }
+.import-file-picker strong, .import-file-picker small { display:block; }
+.import-file-picker strong { font-size:13px; }
+.import-file-picker small { color:var(--muted); font-size:10px; margin-top:5px; line-height:1.4; }
+.import-mode { display:grid; align-content:center; gap:7px; font-size:11px; font-weight:700; }
+.import-mode select { width:100%; height:43px; border:1px solid var(--line); border-radius:10px; padding:0 10px; background:var(--surface); color:var(--text); }
+.import-summary { min-height:38px; display:flex; align-items:center; margin-top:15px; padding:9px 12px; background:var(--surface-2); border-radius:10px; color:var(--muted); font-size:11px; }
+.import-summary strong { color:var(--green); }
+.import-summary em { color:var(--red); font-style:normal; }
+.import-preview { min-height:220px; max-height:390px; overflow:auto; margin-top:12px; border:1px solid var(--line); border-radius:13px; }
+.import-placeholder { min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--muted); gap:7px; font-size:30px; }
+.import-placeholder strong { color:var(--text); font-size:13px; }
+.import-placeholder span { font-size:10px; }
+.import-table { min-width:650px; }
+.import-more { text-align:center; padding:10px; background:var(--surface-2); color:var(--muted); font-size:10px; }
+.import-errors { margin:10px; border:1px solid #f0cece; background:var(--red-soft); border-radius:10px; padding:9px 12px; font-size:10px; color:var(--red); }
+.import-errors summary { cursor:pointer; font-weight:750; }
+.import-errors ul { padding-left:18px; margin:8px 0 0; }
+.import-footer { margin:0; }
+@media (max-width:580px) { .import-controls { grid-template-columns:1fr; } .import-body { padding:16px; } .import-modal { max-height:94vh; } }
+
   </style>
 </head>
 <body>
@@ -530,12 +557,25 @@ body.dark input[type="date"] { color-scheme: dark; }
           <div class="settings-grid">
             <article class="panel settings-card cloud-settings-card"><div class="settings-title"><div class="settings-icon">☁️</div><div><h3>电脑与手机同步</h3><p>修改后自动保存到云端，其他设备会收到最新数据</p></div></div><div class="cloud-card-body"><div class="cloud-card-status"><i></i><div><strong id="cloudCardStatus">尚未连接云端</strong><span>同步口令仅保存在当前设备浏览器中</span></div></div><div class="cloud-card-actions"><button class="btn btn-primary" id="cloudConnectBtn">连接或更换口令</button><button class="btn btn-secondary" id="cloudDisconnectBtn">断开本机同步</button></div></div></article>
             <article class="panel settings-card"><div class="settings-title"><div class="settings-icon">🏫</div><div><h3>班级信息</h3><p>显示在首页和打印报表中</p></div></div><form id="classSettingsForm" class="form-grid"><label><span>班级名称</span><input name="className" required /></label><label><span>学校名称</span><input name="schoolName" /></label><label><span>班主任</span><input name="teacher" /></label><label><span>班费管理员</span><input name="manager" /></label><div class="form-actions span-2"><button class="btn btn-primary" type="submit">保存班级信息</button></div></form></article>
+            <article class="panel settings-card batch-import-card"><div class="settings-title"><div class="settings-icon">📥</div><div><h3>批量导入</h3><p>支持 Excel 和 CSV，可追加或替换现有数据</p></div></div><div class="backup-actions"><button class="backup-btn" id="batchImportTransactionsBtn"><svg><use href="#i-receipt"/></svg><div><strong>导入收支明细</strong><span>日期、摘要、收入和支出等</span></div></button><button class="backup-btn" id="batchImportStudentsBtn"><svg><use href="#i-users"/></svg><div><strong>导入学生名单</strong><span>姓名、学号、家长及缴费情况</span></div></button><button class="backup-btn" id="downloadTransactionTemplateBtn"><svg><use href="#i-download"/></svg><div><strong>下载收支模板</strong><span>CSV 格式，可用 Excel 编辑</span></div></button><button class="backup-btn" id="downloadStudentTemplateBtn"><svg><use href="#i-download"/></svg><div><strong>下载学生模板</strong><span>包含缴费状态示例</span></div></button></div></article>
             <article class="panel settings-card"><div class="settings-title"><div class="settings-icon">💾</div><div><h3>数据备份</h3><p>定期备份，换电脑也不怕丢</p></div></div><div class="backup-actions"><button class="backup-btn" id="backupBtn"><svg><use href="#i-download"/></svg><div><strong>导出完整备份</strong><span>保存为 JSON 文件</span></div></button><label class="backup-btn"><svg><use href="#i-upload"/></svg><div><strong>导入备份数据</strong><span>从 JSON 文件恢复</span></div><input id="importFile" type="file" accept="application/json" hidden /></label><button class="backup-btn" id="exportCsvBtn"><svg><use href="#i-receipt"/></svg><div><strong>导出 Excel 明细</strong><span>保存为 CSV 表格</span></div></button><button class="backup-btn" id="printBtn"><svg><use href="#i-print"/></svg><div><strong>打印收支报告</strong><span>生成适合公示的报表</span></div></button></div></article>
             <article class="panel settings-card"><div class="settings-title"><div class="settings-icon">🎨</div><div><h3>外观与习惯</h3><p>选择更适合你的使用方式</p></div></div><div class="setting-list"><label class="setting-row"><div><strong>深色模式</strong><span>夜间使用更舒适</span></div><input type="checkbox" id="darkModeToggle" class="switch" /></label><label class="setting-row"><div><strong>金额隐藏</strong><span>公共场合保护财务隐私</span></div><input type="checkbox" id="privacyToggle" class="switch" /></label></div></article>
             <article class="panel settings-card danger-zone"><div class="settings-title"><div class="settings-icon">🧹</div><div><h3>数据管理</h3><p>操作前建议先导出备份</p></div></div><button class="btn btn-danger-outline" id="resetDemoBtn">恢复表格初始数据</button><button class="btn btn-danger-outline" id="clearDataBtn">清空全部数据</button></article>
           </div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="batchImportModal" aria-hidden="true">
+    <div class="modal import-modal" role="dialog" aria-modal="true" aria-labelledby="batchImportTitle">
+      <div class="modal-header"><div><span class="eyebrow">Excel / CSV</span><h2 id="batchImportTitle">批量导入</h2></div><button class="icon-btn" data-close-modal="batchImportModal" aria-label="关闭"><svg><use href="#i-x"/></svg></button></div>
+      <div class="import-body">
+        <div class="import-controls"><label class="import-file-picker"><input id="batchImportFile" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden/><svg><use href="#i-upload"/></svg><span><strong>选择 Excel 或 CSV 文件</strong><small>单次可导入一张表，系统会自动识别常见中文表头</small></span></label><label class="import-mode"><span>导入方式</span><select id="batchImportMode"><option value="append">追加数据（自动跳过重复项）</option><option value="replace">替换现有数据</option></select></label></div>
+        <div class="import-summary" id="batchImportSummary"></div>
+        <div class="import-preview" id="batchImportPreview"></div>
+      </div>
+      <div class="modal-footer import-footer"><button type="button" class="btn btn-secondary" data-close-modal="batchImportModal">取消</button><button type="button" class="btn btn-primary" id="batchImportApplyBtn" disabled>确认导入</button></div>
     </div>
   </div>
 
@@ -588,6 +628,7 @@ body.dark input[type="date"] { color-scheme: dark; }
 
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
   <div class="mobile-overlay" id="mobileOverlay"></div>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
 (() => {
   'use strict';
@@ -713,6 +754,10 @@ body.dark input[type="date"] { color-scheme: dark; }
   let cloudTimer = null;
   let cloudPushTimer = null;
   let cloudStatus = '未连接';
+  let batchImportType = 'transactions';
+  let batchImportRows = [];
+  let batchImportErrors = [];
+  let batchImportFileName = '';
 
   async function cloudRpc(functionName, payload) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
@@ -1221,6 +1266,262 @@ body.dark input[type="date"] { color-scheme: dark; }
     const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function normalizeHeader(value) {
+    return String(value ?? '').trim().toLowerCase().replace(/[\s　_（）()：:·.\-/]/g, '');
+  }
+
+  function parseNumber(value) {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+    const cleaned = String(value ?? '').replace(/[,，￥¥元\s]/g, '');
+    const number = Number.parseFloat(cleaned);
+    return Number.isFinite(number) ? number : 0;
+  }
+
+  function parseImportDate(value) {
+    if (!value && value !== 0) return '';
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      // Excel 日期在不同时区可能落到前一天，向中午归一化后只取日期部分。
+      const normalized = new Date(value.getTime() + 12 * 60 * 60 * 1000);
+      let year = normalized.getUTCFullYear();
+      if (year === 2525) year = 2025; // 兼容原始班费表中的明显年份笔误。
+      return `${year}-${String(normalized.getUTCMonth()+1).padStart(2,'0')}-${String(normalized.getUTCDate()).padStart(2,'0')}`;
+    }
+    if (typeof value === 'number' && window.XLSX?.SSF) {
+      const date = XLSX.SSF.parse_date_code(value);
+      if (date) return `${date.y}-${String(date.m).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`;
+    }
+    const text = String(value).trim().replace(/[年月/.]/g, '-').replace(/日/g, '').replace(/--+/g, '-');
+    const match = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (match) return `${match[1]}-${String(Number(match[2])).padStart(2,'0')}-${String(Number(match[3])).padStart(2,'0')}`;
+    const date = new Date(text);
+    if (!Number.isNaN(date.getTime())) return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    return '';
+  }
+
+  function inferImportCategory(description = '') {
+    const text = String(description);
+    if (/班费|缴费|收入/.test(text)) return '班费收缴';
+    if (/书|本子|积分本|作业|生字|卡片|文具|文件夹|练习|打印|七巧板/.test(text)) return '学习用品';
+    if (/阅读|图书/.test(text)) return '图书阅读';
+    if (/奖|礼物|礼品|积分|磁性贴/.test(text)) return '奖励礼物';
+    if (/零食|点心|水|糖|饮料|餐/.test(text)) return '餐饮点心';
+    if (/运动|活动|风车|队旗|球托|跳绳|遮阳帽|话筒|拉花|葱/.test(text)) return '活动用品';
+    if (/布置|绿植|箩筐|柜|胶带|钉子|油漆|拖把架/.test(text)) return '班级布置';
+    if (/车|交通|大巴/.test(text)) return '交通出行';
+    return '其他支出';
+  }
+
+  function findColumn(headers, aliases) {
+    const normalized = headers.map(normalizeHeader);
+    for (const alias of aliases) {
+      const key = normalizeHeader(alias);
+      const index = normalized.findIndex(h => h && (h === key || h.includes(key) || key.includes(h)));
+      if (index >= 0) return index;
+    }
+    return -1;
+  }
+
+  function selectImportSheet(workbook, type) {
+    const wanted = type === 'students' ? /学生|名单|通讯录|花名册/ : /收支|明细|班费|流水|账/;
+    const matched = workbook.SheetNames.find(name => wanted.test(name));
+    return workbook.Sheets[matched || workbook.SheetNames[0]];
+  }
+
+  function parseTransactionRows(matrix) {
+    const rows = [];
+    const errors = [];
+    const headerIndex = matrix.slice(0, 25).findIndex(row => {
+      const cells = row.map(normalizeHeader);
+      return cells.some(v => v.includes('日期')) && cells.some(v => v.includes('摘要') || v.includes('说明') || v.includes('用途'));
+    });
+    if (headerIndex < 0) return { rows, errors: ['未找到包含“日期”和“摘要/费用说明”的表头'] };
+    const headers = matrix[headerIndex];
+    const normalized = headers.map(normalizeHeader);
+    const originalLedger = normalized.some(v => v === '收入') && normalized.some(v => v === '支出') && normalized.some(v => v.includes('班费结余'));
+
+    if (originalLedger) {
+      const dateCol = findColumn(headers, ['日期']);
+      const descCol = findColumn(headers, ['摘要','费用说明']);
+      const incomeStart = findColumn(headers, ['收入']);
+      const expenseStart = findColumn(headers, ['支出']);
+      const receiptCol = findColumn(headers, ['备注','票据编号']);
+      const incomeAmountCol = incomeStart + 2;
+      const expenseAmountCol = expenseStart + 2;
+      for (let i = headerIndex + 2; i < matrix.length; i++) {
+        const row = matrix[i];
+        const date = parseImportDate(row[dateCol]);
+        const description = String(row[descCol] ?? '').trim();
+        const income = parseNumber(row[incomeAmountCol]);
+        const expense = parseNumber(row[expenseAmountCol]);
+        if (!date && !description && !income && !expense) continue;
+        if (!date || !description || (!income && !expense)) { errors.push(`第 ${i+1} 行缺少日期、摘要或金额`); continue; }
+        const type = income > 0 ? 'income' : 'expense';
+        const amount = income > 0 ? income : expense;
+        const notes = [];
+        if (type === 'income') {
+          if (row[incomeStart] !== '' && row[incomeStart] != null) notes.push(`缴费人数：${row[incomeStart]}人`);
+          if (row[incomeStart+1] !== '' && row[incomeStart+1] != null) notes.push(`人均缴纳：${row[incomeStart+1]}元`);
+        } else {
+          if (row[expenseStart] !== '' && row[expenseStart] != null) notes.push(`数量：${row[expenseStart]}`);
+          if (row[expenseStart+1] !== '' && row[expenseStart+1] != null) notes.push(`单价：${row[expenseStart+1]}元`);
+        }
+        rows.push({ id: uid('import'), type, date, amount, category: type === 'income' ? '班费收缴' : inferImportCategory(description), description, person: state.settings.manager || '', method: '其他', receiptNo: receiptCol >= 0 ? String(row[receiptCol] ?? '').trim() : '', note: notes.join('；'), receipt: '' });
+      }
+      return { rows, errors };
+    }
+
+    const dateCol = findColumn(headers, ['日期','时间']);
+    const typeCol = findColumn(headers, ['类型','收支类型','收入支出']);
+    const descCol = findColumn(headers, ['摘要','费用说明','说明','用途','项目']);
+    const amountCol = findColumn(headers, ['金额','发生金额']);
+    const incomeCol = findColumn(headers, ['收入金额','收入']);
+    const expenseCol = findColumn(headers, ['支出金额','支出']);
+    const categoryCol = findColumn(headers, ['分类','费用分类','类别']);
+    const personCol = findColumn(headers, ['经手人','记账人','负责人']);
+    const methodCol = findColumn(headers, ['支付方式','付款方式']);
+    const receiptCol = findColumn(headers, ['票据编号','发票','凭证']);
+    const noteCol = findColumn(headers, ['备注','附注']);
+
+    for (let i = headerIndex + 1; i < matrix.length; i++) {
+      const row = matrix[i];
+      const date = parseImportDate(row[dateCol]);
+      const description = String(row[descCol] ?? '').trim();
+      const income = incomeCol >= 0 ? parseNumber(row[incomeCol]) : 0;
+      const expense = expenseCol >= 0 ? parseNumber(row[expenseCol]) : 0;
+      const directAmount = amountCol >= 0 ? parseNumber(row[amountCol]) : 0;
+      const rawType = typeCol >= 0 ? String(row[typeCol] ?? '').trim() : '';
+      let type = income > 0 ? 'income' : expense > 0 ? 'expense' : /收|income/i.test(rawType) ? 'income' : 'expense';
+      const amount = income || expense || directAmount;
+      if (!date && !description && !amount) continue;
+      if (!date || !description || !(amount > 0)) { errors.push(`第 ${i+1} 行缺少日期、费用说明或有效金额`); continue; }
+      let category = categoryCol >= 0 ? String(row[categoryCol] ?? '').trim() : '';
+      if (!category) category = type === 'income' ? '班费收缴' : inferImportCategory(description);
+      rows.push({ id: uid('import'), type, date, amount, category, description, person: personCol >= 0 ? String(row[personCol] ?? '').trim() : (state.settings.manager || ''), method: methodCol >= 0 ? String(row[methodCol] ?? '').trim() || '其他' : '其他', receiptNo: receiptCol >= 0 ? String(row[receiptCol] ?? '').trim() : '', note: noteCol >= 0 ? String(row[noteCol] ?? '').trim() : '', receipt: '' });
+    }
+    return { rows, errors };
+  }
+
+  function parseStudentRows(matrix) {
+    const rows = [];
+    const errors = [];
+    const headerIndex = matrix.slice(0, 25).findIndex(row => row.map(normalizeHeader).some(v => ['学生姓名','姓名'].includes(v)));
+    if (headerIndex < 0) return { rows, errors: ['未找到“学生姓名”或“姓名”表头'] };
+    const headers = matrix[headerIndex];
+    const nameCol = findColumn(headers, ['学生姓名','姓名']);
+    const numberCol = findColumn(headers, ['学号','序号','编号']);
+    const parentCol = findColumn(headers, ['家长称呼','家长姓名','联系人','监护人']);
+    const phoneCol = findColumn(headers, ['联系电话','手机号','电话']);
+    const paidCol = findColumn(headers, ['缴费状态','是否缴费','状态','已缴']);
+    const paidDateCol = findColumn(headers, ['缴费日期','支付日期']);
+    const paidAmountCol = findColumn(headers, ['实缴金额','缴费金额','已缴金额']);
+    for (let i = headerIndex + 1; i < matrix.length; i++) {
+      const row = matrix[i];
+      const name = String(row[nameCol] ?? '').trim();
+      if (!name) {
+        if (row.some(v => String(v ?? '').trim())) errors.push(`第 ${i+1} 行缺少学生姓名`);
+        continue;
+      }
+      const status = paidCol >= 0 ? String(row[paidCol] ?? '').trim().toLowerCase() : '';
+      const paid = /已缴|已交|完成|是|yes|true|^1$|√|✓/.test(status);
+      const paidAmount = paidAmountCol >= 0 ? parseNumber(row[paidAmountCol]) : (paid ? Number(state.collection.fee || 0) : 0);
+      const rawNumber = numberCol >= 0 ? row[numberCol] : rows.length + 1;
+      const studentNumber = typeof rawNumber === 'number' ? String(rawNumber).padStart(2,'0') : String(rawNumber ?? '').trim();
+      rows.push({ id: uid('stu'), name, number: studentNumber, parent: parentCol >= 0 ? String(row[parentCol] ?? '').trim() : '', phone: phoneCol >= 0 ? String(row[phoneCol] ?? '').trim() : '', paid, paidDate: paidDateCol >= 0 ? parseImportDate(row[paidDateCol]) : (paid ? today() : ''), paidAmount, paymentEntryId: '' });
+    }
+    return { rows, errors };
+  }
+
+  function renderBatchImportPreview() {
+    const container = $('#batchImportPreview');
+    const summary = $('#batchImportSummary');
+    const apply = $('#batchImportApplyBtn');
+    if (!batchImportRows.length && !batchImportErrors.length) {
+      summary.innerHTML = '<span>请选择 Excel 或 CSV 文件，系统会自动识别表头。</span>';
+      container.innerHTML = '<div class="import-placeholder">📄<strong>等待选择文件</strong><span>支持 .xlsx、.xls 和 .csv</span></div>';
+      apply.disabled = true;
+      return;
+    }
+    summary.innerHTML = `<span><b>${escapeHtml(batchImportFileName)}</b> · 识别到 <strong>${batchImportRows.length}</strong> 条有效数据${batchImportErrors.length ? ` · <em>${batchImportErrors.length} 条未通过</em>` : ''}</span>`;
+    apply.disabled = batchImportRows.length === 0;
+    const visible = batchImportRows.slice(0, 10);
+    if (batchImportType === 'transactions') {
+      container.innerHTML = `<div class="table-responsive"><table class="data-table import-table"><thead><tr><th>日期</th><th>类型</th><th>摘要</th><th>分类</th><th class="align-right">金额</th></tr></thead><tbody>${visible.map(r => `<tr><td>${formatDate(r.date)}</td><td><span class="type-pill ${r.type}">${r.type === 'income' ? '收入' : '支出'}</span></td><td>${escapeHtml(r.description)}</td><td>${escapeHtml(r.category)}</td><td class="align-right money">${money(r.amount)}</td></tr>`).join('')}</tbody></table></div>`;
+    } else {
+      container.innerHTML = `<div class="table-responsive"><table class="data-table import-table"><thead><tr><th>学号</th><th>学生姓名</th><th>家长称呼</th><th>联系电话</th><th>缴费状态</th></tr></thead><tbody>${visible.map(r => `<tr><td>${escapeHtml(r.number)}</td><td><b>${escapeHtml(r.name)}</b></td><td>${escapeHtml(r.parent || '—')}</td><td>${escapeHtml(r.phone || '—')}</td><td><span class="status-pill ${r.paid ? 'paid' : 'pending'}">${r.paid ? '已缴' : '待缴'}</span></td></tr>`).join('')}</tbody></table></div>`;
+    }
+    if (batchImportRows.length > 10) container.insertAdjacentHTML('beforeend', `<div class="import-more">下方仅预览前 10 条，导入时将处理全部 ${batchImportRows.length} 条。</div>`);
+    if (batchImportErrors.length) container.insertAdjacentHTML('beforeend', `<details class="import-errors"><summary>查看 ${batchImportErrors.length} 条未通过记录</summary><ul>${batchImportErrors.slice(0,20).map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul></details>`);
+  }
+
+  function openBatchImport(type) {
+    batchImportType = type;
+    batchImportRows = [];
+    batchImportErrors = [];
+    batchImportFileName = '';
+    $('#batchImportTitle').textContent = type === 'transactions' ? '批量导入收支明细' : '批量导入学生名单';
+    $('#batchImportFile').value = '';
+    $('#batchImportMode').value = 'append';
+    renderBatchImportPreview();
+    openModal('batchImportModal');
+  }
+
+  async function handleBatchImportFile(file) {
+    if (!file) return;
+    if (!window.XLSX) throw new Error('表格解析组件加载失败，请检查网络后刷新页面');
+    batchImportFileName = file.name;
+    const isCsv = /\.csv$/i.test(file.name);
+    const source = isCsv ? await file.text() : await file.arrayBuffer();
+    const workbook = XLSX.read(source, { type: isCsv ? 'string' : 'array', cellDates: true, cellFormula: true });
+    const sheet = selectImportSheet(workbook, batchImportType);
+    const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+    const parsed = batchImportType === 'transactions' ? parseTransactionRows(matrix) : parseStudentRows(matrix);
+    batchImportRows = parsed.rows;
+    batchImportErrors = parsed.errors;
+    renderBatchImportPreview();
+  }
+
+  function applyBatchImport() {
+    if (!batchImportRows.length) return;
+    const mode = $('#batchImportMode').value;
+    if (mode === 'replace' && !confirm(`确定用本次 ${batchImportRows.length} 条数据替换现有${batchImportType === 'transactions' ? '收支明细' : '学生名单'}吗？`)) return;
+    let imported = 0;
+    let skipped = 0;
+    if (batchImportType === 'transactions') {
+      if (mode === 'replace') {
+        state.transactions = batchImportRows;
+        imported = batchImportRows.length;
+      } else {
+        const keys = new Set(state.transactions.map(r => `${r.date}|${r.type}|${Number(r.amount).toFixed(4)}|${r.description}`));
+        batchImportRows.forEach(row => {
+          const key = `${row.date}|${row.type}|${Number(row.amount).toFixed(4)}|${row.description}`;
+          if (keys.has(key)) skipped++; else { state.transactions.push(row); keys.add(key); imported++; }
+        });
+      }
+    } else {
+      if (mode === 'replace') {
+        state.students = batchImportRows;
+        imported = batchImportRows.length;
+      } else {
+        const keys = new Set(state.students.map(r => `${r.name}|${r.number}`));
+        batchImportRows.forEach(row => {
+          const key = `${row.name}|${row.number}`;
+          if (keys.has(key)) skipped++; else { state.students.push(row); keys.add(key); imported++; }
+        });
+      }
+    }
+    closeModal('batchImportModal');
+    saveState(`批量导入完成：新增 ${imported} 条${skipped ? `，跳过重复 ${skipped} 条` : ''}`);
+  }
+
+  function downloadImportTemplate(type) {
+    const rows = type === 'transactions'
+      ? [['日期','类型','费用说明','金额','分类','经手人','支付方式','票据编号','备注'],['2026-09-19','支出','示例：购买班级用品','100','学习用品','小仙女','微信','发票编号','可选备注']]
+      : [['学号','学生姓名','家长称呼','联系电话','缴费状态','缴费日期','实缴金额'],['01','示例学生','示例家长','13800000000','待缴','',''],['02','已缴学生','家长称呼','13900000000','已缴','2026-09-19','300']];
+    const csv = '\ufeff' + rows.map(row => row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    download(type === 'transactions' ? '收支明细批量导入模板.csv' : '学生名单批量导入模板.csv', csv, 'text/csv;charset=utf-8');
+    toast('导入模板已下载');
+  }
+
   function exportCSV() {
     const rows = [['日期','类型','费用说明','分类','经手人','支付方式','金额','票据编号','备注']];
     [...state.transactions].sort((a,b) => b.date.localeCompare(a.date)).forEach(t => rows.push([t.date, t.type === 'income' ? '收入' : '支出', t.description, t.category, t.person || '', t.method || '', t.type === 'income' ? t.amount : -t.amount, t.receiptNo || '', t.note || '']));
@@ -1308,6 +1609,16 @@ body.dark input[type="date"] { color-scheme: dark; }
     });
     $('#collectionSettingsBtn').addEventListener('click', () => { const f=$('#collectionForm'); f.elements.term.value=state.collection.term; f.elements.fee.value=state.collection.fee; f.elements.deadline.value=state.collection.deadline; openModal('collectionModal'); });
     $('#collectionForm').addEventListener('submit', e => { e.preventDefault(); const fd=new FormData(e.currentTarget); state.collection={ term:fd.get('term').trim(), fee:Number(fd.get('fee')), deadline:fd.get('deadline') }; closeModal('collectionModal'); saveState('本期班费设置已更新'); });
+
+    $('#batchImportTransactionsBtn').addEventListener('click', () => openBatchImport('transactions'));
+    $('#batchImportStudentsBtn').addEventListener('click', () => openBatchImport('students'));
+    $('#downloadTransactionTemplateBtn').addEventListener('click', () => downloadImportTemplate('transactions'));
+    $('#downloadStudentTemplateBtn').addEventListener('click', () => downloadImportTemplate('students'));
+    $('#batchImportFile').addEventListener('change', async e => {
+      try { await handleBatchImportFile(e.target.files[0]); }
+      catch (error) { batchImportRows=[]; batchImportErrors=[error.message || '文件解析失败']; renderBatchImportPreview(); toast(error.message || '文件解析失败','error'); }
+    });
+    $('#batchImportApplyBtn').addEventListener('click', applyBatchImport);
 
     $('#cloudStatusBtn').addEventListener('click', openSyncSetup);
     $('#cloudConnectBtn').addEventListener('click', openSyncSetup);
